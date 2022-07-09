@@ -108,6 +108,49 @@ app.post('/withdraw',verifyIfExistAccountCPF, (req,res)=>{
 
 })
 
+
+app.get('/statement/date', verifyIfExistAccountCPF, (req, res) => {
+   
+    const {customer} = req
+    const {date} = req.query
+
+    const dateFormat = new Date(date + " 00:00")
+
+    const statement = customer.statement.filter(
+        (statement) => 
+            statement.created_at.toDateString() ===  new Date(dateFormat).toDateString()
+    )    
+    
+
+    return res.status(200).json(customer.statement)
+    
+})
+
+app.put('/account', verifyIfExistAccountCPF, (req, res) => {
+    const {name} = req.body
+    const {customer} = req
+
+    customer.name = name
+
+    return res.status(200).send()
+})
+
+app.get('/account', verifyIfExistAccountCPF, (req, res) => {
+    const {customer} = req
+
+    return res.status(200).json(customer)
+})
+
+app.delete('/account', verifyIfExistAccountCPF, (req, res) => {
+    const {customer} = req
+
+    const index = customers.indexOf(customer)
+
+    customers.splice(index,1)
+
+    return res.status(204).send()
+})
+
 app.listen(3333, () => {
     console.log('Server started on port 3333');
 })

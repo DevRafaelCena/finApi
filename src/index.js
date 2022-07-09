@@ -26,9 +26,9 @@ function getBalance(statement){
 
     const balance = statement.reduce((acc,operation) => {
         if(operation.type === 'credit'){
-            return acc + operation.value
+            return acc + operation.amount
         }
-        return acc - operation.value
+        return acc - operation.amount
     
     },0)
 
@@ -149,6 +149,14 @@ app.delete('/account', verifyIfExistAccountCPF, (req, res) => {
     customers.splice(index,1)
 
     return res.status(204).send()
+})
+
+app.get("/balance", verifyIfExistAccountCPF, (req, res) => {
+    const {customer} = req
+
+    const balance = getBalance(customer.statement)
+
+    return res.status(200).json({balance})
 })
 
 app.listen(3333, () => {

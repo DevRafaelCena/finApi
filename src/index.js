@@ -22,6 +22,19 @@ function verifyIfExistAccountCPF(req,res,next){
     
 }
 
+function getBalance(statement){
+
+    const balance = statement.reduce((acc,operation) => {
+        if(operation.type === 'credit'){
+            return acc + operation.value
+        }
+        return acc - operation.value
+    
+    },0)
+
+    return balance
+}
+
 
 
 app.post("/account", (req, res) => {
@@ -71,6 +84,29 @@ app.post('/deposit',verifyIfExistAccountCPF, (req,res)=>{
 
 })
 
+app.post('/withdraw',verifyIfExistAccountCPF, (req,res)=>{
+    const {amount} = req.body
+    const {customer} = req
+
+
+    const balance = getBalance(customer.statement)
+
+
+    if(balance < amount){
+        return res.status(400).json({error: 'Insufficient funds'})
+    }
+
+    const statementOperation = {
+        amount,
+        created_at: new Date(),
+        type: 'debit'
+    }
+
+    customer.statement.push(statementOperation)
+
+    return res.status(201).send()
+
+})
 
 app.listen(3333, () => {
     console.log('Server started on port 3333');
